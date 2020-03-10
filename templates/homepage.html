@@ -1,9 +1,28 @@
 {% extends "base.html" %}
 
+{% block head %}
+    <link rel="stylesheet" href="/static/jquery-jvectormap-2.0.5.css" type="text/css" media="screen"/>
+    <script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
+    <script src="/static/jquery-jvectormap-2.0.5.min.js"></script>
+    <script src="/static/jquery-jvectormap-world-merc.js"></script>
+
+{% endblock %}
+
 {% block content %}
 
     <h1>Listen To Music From The World!</h1>
     <button><a href="/login">Login</a></button>
-    <img id="world-map" src="https://geology.com/world/world-map.gif">
+
+    <div id="world-map" style="width: 600px; height: 400px"></div>
+    <script>
+        $(function(){
+            $('#world-map').vectorMap({
+                map: 'world_merc',
+                onRegionClick: function(_, code) {
+                    console.log(`${code}`);
+                }
+            });
+        });
+    </script>
 
 {% endblock %}
