@@ -16,9 +16,9 @@ class User(db.Model):
     # Every table should have a primary_key and should be a unique identifier (In this case, I used 
     # the spotify_id)
     spotify_id = db.Column(db.String, primary_key=True)
-    display_name = db.Column(db.String(50), nullable=False, default='user')
-    access_token = db.Column(db.String(50), nullable=False)
-    auth_token = db.Column(db.String(50), nullable=False)
+    display_name = db.Column(db.String(100), nullable=False, default='user')
+    access_token = db.Column(db.String(200), nullable=False)
+    auth_token = db.Column(db.String(200), nullable=False)
 
     # Friendly representation of the object when you print it. Usually prints the class name and 
     # memory address location.
@@ -33,7 +33,7 @@ class User(db.Model):
     def save(self):
         db.session.add(self)
         db.session.commit()
-        
+
 
 class CountryPlaylist(db.Model):
     """Data model for a country_playlist."""
