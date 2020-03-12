@@ -24,6 +24,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from jinja2 import StrictUndefined
 import requests
 import urllib
+from model import User, connect_to_db
 
 # app is an instance of the Flask class
 # In order to use Flask SQLAlchemy, you need to have an app
@@ -63,6 +64,7 @@ def login():
 
 
 # get spotify user code in order to create a token
+# auth/callback is only when a user logs in our app, once they log in, all subequent request will use the same access token
 @app.route('/auth/callback')
 def auth():
 
@@ -98,6 +100,54 @@ def auth():
     # we extract the access token from the response
     access_token = response_json["access_token"]
 
+    # --------- End of token_access beyond this line -----------------
+
+    headers = {'Authorization': f'Bearer {access_token}'}
+
+    get_user_url = "https://api.spotify.com/v1/me"
+
+    # Makes a get request to the first argument and pass in headers as a key argument
+    ''' reponse https://developer.spotify.com/documentation/web-api/reference/users-profile/get-current-users-profile/
+    will return a response object, need to convert it to a python dictionary
+    '''
+    response = requests.get(get_user_url, headers=headers)
+
+    response_json = response.json()
+
+    # return response_json
+
+    spotify_id = response_json["id"]
+    display_name = response_json["display_name"]
+
+    active_user = User.query.get(spotify_id)
+
+
+    # If the user is in our database, we assign them an access_token. If not, we create a new User instance 
+    # Active user = logged in past, removed cookies, no access_token
+    # lost auth_token = refresh token (I have your access_token and auth_token) as a user, I should also auth_token. User gives 
+    # my app the auth_token. My app needs to verify the auth_token in my database (this is most likely judy), in this case, you need
+    # to re-relog in (removed cookie)
+
+    if active_user:
+        active_user.access_token = access_token
+    else:
+        active_user =  User(spotify_id=spotify_id, display_name=display_name, access_token=access_token)
+
+    active_user.set_new_auth_token()
+    active_user.save()
+
+    # auth token = browser to communicate to our server/app (for us to verify who the user is)
+    # access token = our server/app to communicate with spotify API (for spotify to verify our server/app)
+
+    # We can add keys to the session, which will update the user's cookie.
+    # Every time the user makes a request, the auth_token is given back to the server and that is how the server 
+    # check that row.
+    # Can change display_name (spotify_id is unique)
+    # Access_token = we dont want anyone to have it
+    # Giving user these two information so that they can pass it back to us every subsequent request. 
+    session['auth_token'] = active_user.auth_token
+    session['spotify_id'] = spotify_id
+
     return redirect('/')
 
 if __name__ == "__main__":
@@ -107,6 +157,7 @@ if __name__ == "__main__":
 
     # Use the DebugToolbar
     DebugToolbarExtension(app)
+    connect_to_db(app)
 
     # run is an instance method
     app.run(host="0.0.0.0")

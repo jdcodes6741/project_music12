@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from secrets import token_urlsafe
 
 # Created an instance of SQLAlchemy class, which represents the connection to the 
 # database
@@ -16,15 +17,23 @@ class User(db.Model):
     # the spotify_id)
     spotify_id = db.Column(db.String, primary_key=True)
     display_name = db.Column(db.String(50), nullable=False, default='user')
-    access_key = db.Column(db.String(50), nullable=False)
-    auth_key = db.Column(db.String(50), nullable=False)
+    access_token = db.Column(db.String(50), nullable=False)
+    auth_token = db.Column(db.String(50), nullable=False)
 
     # Friendly representation of the object when you print it. Usually prints the class name and 
     # memory address location.
     def __repr__(self):
         """Return a human-readable representation of a User."""
         return f"<User class - display_name:{self.display_name} and spotify_id:{self.spotify_id}>"
+
+    def set_new_auth_token(self):
+        self.auth_token = token_urlsafe()
+        return self.auth_token
     
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+        
 
 class CountryPlaylist(db.Model):
     """Data model for a country_playlist."""
