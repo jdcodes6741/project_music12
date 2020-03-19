@@ -158,17 +158,21 @@ def auth():
     # Access_token = we dont want anyone to have it
     # Giving user these two information so that they can pass it back to us every subsequent request. 
     # session = to save the session on the browser.
+    # Auth_token is for us to verify who the user is (every time the user clicks a different page, to prevent logging in everytime)
     session['auth_token'] = active_user.auth_token
 
     # assignment (updating the client's session)
+    # stored auth_token and spotify_id in session. Session is stored on the client/browser. It is passed to the server 
+    # on every request. That is how we can read from server.py
     session['spotify_id'] = spotify_id
 
     return redirect('/')
 
 
+# Only log in once, every other subsequent request, checks auth_token. This method is to check the user's auth_token.
 def check_auth_and_fetch_current_user():
     # Anything in the session dictionary, we can see globally (if you have access to the session, you have all access to the information as well)
-    if 'spotify_id' in session:
+    if 'spotify_id' in session and "auth_token" in session:
 
         # We are storing the session["spotify_id"] into a variable called spotify_id
         spotify_id = session["spotify_id"]
@@ -179,7 +183,7 @@ def check_auth_and_fetch_current_user():
         # After that is done,  there is a user with this spotify_id 
         active_user = User.query.get(spotify_id)
         # value of session is encryted (auth_token and spotify_id is inside session)
-        if active_user and "auth_token" in session and active_user.auth_token == session["auth_token"]:
+        if active_user and active_user.auth_token == session["auth_token"]:
             return active_user
 
 
