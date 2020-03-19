@@ -9,9 +9,10 @@
 {% endblock %}
 
 {% block content %}
-
-    <h1>Listen To Music From The World!</h1>
-    <button><a href="/login">Login</a></button>
+    {% if active_user %}
+        <h1>Listen To Music From The World!</h1>
+        <p>Hello, {{active_user.display_name}}
+        <button><a href="/login">Login</a></button>
 
     <div id="world-map" style="width: 600px; height: 400px"></div>
     <script>

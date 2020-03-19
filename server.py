@@ -18,6 +18,9 @@ homepage function, which returns an html page and return it
 urllib = is a library that helps us with url related tasks (in this project, we will use the
 urlencode function, which turns a dictionary into a query string)
 
+session = a global variable (look at flask sourcecode) Session object 
+
+
 """
 from flask import Flask, redirect, request, render_template, session
 from flask_debugtoolbar import DebugToolbarExtension
@@ -43,7 +46,9 @@ SPOTIFY_APP_SECRET="c543c3c9a49e41ed9da9712b2f01f20b"
 # Homepage
 @app.route('/')
 def homepage():
-    return render_template('homepage.html')
+    active_user = check_auth_and_fetch_current_user()
+    
+    return render_template('homepage.html', active_user=active_user)
 
 
 # Login page which redirect to spotify
@@ -133,7 +138,14 @@ def auth():
     else:
         active_user =  User(spotify_id=spotify_id, display_name=display_name, access_token=access_token)
 
+    # if not active_user:
+    #     active_user =  User(spotify_id=spotify_id, display_name=display_name)
+
+    # active_user.access_token = access_token
+
+    # active_user.auth_token = token_urlsafe()
     active_user.set_new_auth_token()
+
     active_user.save()
 
     # auth token = browser to communicate to our server/app (for us to verify who the user is)
@@ -145,15 +157,36 @@ def auth():
     # Can change display_name (spotify_id is unique)
     # Access_token = we dont want anyone to have it
     # Giving user these two information so that they can pass it back to us every subsequent request. 
+    # session = to save the session on the browser.
     session['auth_token'] = active_user.auth_token
+
+    # assignment (updating the client's session)
     session['spotify_id'] = spotify_id
 
     return redirect('/')
 
+
+def check_auth_and_fetch_current_user():
+    # Anything in the session dictionary, we can see globally (if you have access to the session, you have all access to the information as well)
+    if 'spotify_id' in session:
+
+        # We are storing the session["spotify_id"] into a variable called spotify_id
+        spotify_id = session["spotify_id"]
+
+        # database lives near server (database saves all information going on, historic online orders, only amazon has that information)
+        # We are saving all users who logged into our app in the Users table. 
+        # A user is making a request and giving me their spotify_id to tell me who they are. I need to check in my database if you logged in 
+        # After that is done,  there is a user with this spotify_id 
+        active_user = User.query.get(spotify_id)
+        # value of session is encryted (auth_token and spotify_id is inside session)
+        if active_user and "auth_token" in session and active_user.auth_token == session["auth_token"]:
+            return active_user
+
+
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the
     # point that we invoke the DebugToolbarExtension
-    app.debug = True
+    # app.debug = True
 
     # Use the DebugToolbar
     DebugToolbarExtension(app)

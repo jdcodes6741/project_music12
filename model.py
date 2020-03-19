@@ -15,6 +15,7 @@ class User(db.Model):
 
     # Every table should have a primary_key and should be a unique identifier (In this case, I used 
     # the spotify_id)
+    # primary_key = unique identifier, used to find a particular row (it goes only to the primary key column, which is also spotify_id)
     spotify_id = db.Column(db.String, primary_key=True)
     display_name = db.Column(db.String(100), nullable=False, default='user')
     access_token = db.Column(db.String(200), nullable=False)
