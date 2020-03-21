@@ -26,8 +26,9 @@ from flask import Flask, redirect, request, render_template, session
 from flask_debugtoolbar import DebugToolbarExtension
 from jinja2 import StrictUndefined
 import requests
-import urllib
-from model import User, connect_to_db
+import urllib 
+from model import User, connect_to_db, CountryPlaylist
+import os
 
 # app is an instance of the Flask class
 # In order to use Flask SQLAlchemy, you need to have an app
@@ -40,8 +41,8 @@ app.jinja_env.auto_reload = True
 app.secret_key="ABC"
 
 # client id (my server)
-SPOTIFY_CLIENT_ID="b51004b00f3841c4a5a7734a69c80576"
-SPOTIFY_APP_SECRET="c543c3c9a49e41ed9da9712b2f01f20b"
+SPOTIFY_CLIENT_ID= os.getenv('SPOTIFY_CLIENT_ID')
+SPOTIFY_APP_SECRET= os.getenv('SPOTIFY_APP_SECRET')
 
 # Homepage
 @app.route('/')
@@ -49,6 +50,28 @@ def homepage():
     active_user = check_auth_and_fetch_current_user()
     
     return render_template('homepage.html', active_user=active_user)
+
+# dynamic routing (placeholder <country_code>)
+@app.route('/country_playlist/<country_code>')
+def country_playlist(country_code):
+    active_user = check_auth_and_fetch_current_user()
+    if not active_user:
+        return redirect('/')
+
+    playlist = CountryPlaylist.query.get(country_code)
+    if not playlist:
+        playlist = CountryPlaylist.query.get('GLOBAL')
+
+    # https://developer.spotify.com/documentation/web-api/reference/playlists/get-playlist/
+    playlist_url = "https://api.spotify.com/v1/playlists/"
+
+    # https://developer.spotify.com/documentation/web-api/reference/playlists/get-playlist/ (-H)
+    # https://requests.readthedocs.io/en/master/user/quickstart/#make-a-request
+    # get_auth_header() returns the header with the access token (this is needed for Spotify in order to verify the user has access)
+    response = requests.get(playlist_url+playlist.playlist_id, headers=active_user.get_auth_header())
+    current_playlist = response.json()
+    # return current_playlist
+    return render_template('country_playlist.html', current_playlist=current_playlist, current_user=active_user)
 
 
 # Login page which redirect to spotify
@@ -100,6 +123,7 @@ def auth():
     # this is the response from spotify, and we converted it to a dictionary using .json()
     response_json = response.json()
 
+    print(response_json)
     # return response_json
 
     # we extract the access token from the response
@@ -169,6 +193,38 @@ def auth():
     return redirect('/')
 
 
+@app.route('/search')
+def search():
+    '''
+        renders search page populated with songs from spotify
+    '''
+    # not going to make a request to spotify until we know you are a real user. 
+    active_user = check_auth_and_fetch_current_user()
+    if not active_user:
+        return redirect('/')
+
+    # takes the query parameter and turn it into a dictionary
+    # {"q": "intentions"}
+    params = request.args
+    # this "q" key matches the name="q" in homepage.html
+    search_string = params["q"]
+
+    # https://developer.spotify.com/documentation/web-api/reference/search/search/
+    search_url = "https://api.spotify.com/v1/search"
+    search_params = {
+        "q": search_string,
+        "type": "track",
+        "limit": 20,
+    }
+
+    # every time we make a request to spotify, we have to include the access token in the header (according to Spotify's API)
+    # example of what the request looks like: https://api.spotify.com/v1/search?q=intentions&type=track&limit=20
+    response = requests.get(search_url, params=search_params, headers=active_user.get_auth_header())
+    search_items = response.json()
+    return render_template('search_page.html', search_string=search_string, search_items=search_items['tracks'], current_user=active_user)
+
+
+
 # Only log in once, every other subsequent request, checks auth_token. This method is to check the user's auth_token.
 def check_auth_and_fetch_current_user():
     # Anything in the session dictionary, we can see globally (if you have access to the session, you have all access to the information as well)
@@ -177,10 +233,10 @@ def check_auth_and_fetch_current_user():
         # We are storing the session["spotify_id"] into a variable called spotify_id
         spotify_id = session["spotify_id"]
 
-        # database lives near server (database saves all information going on, historic online orders, only amazon has that information)
-        # We are saving all users who logged into our app in the Users table. 
-        # A user is making a request and giving me their spotify_id to tell me who they are. I need to check in my database if you logged in 
-        # After that is done,  there is a user with this spotify_id 
+        '''Database lives near server (database saves all information going on, historic online orders, only amazon has that information)
+        We are saving all users who logged into our app in the Users table. 
+        A user is making a request and giving me their spotify_id to tell me who they are. I need to check in my database if you logged in 
+        After that is done,  there is a user with this spotify_id'''
         active_user = User.query.get(spotify_id)
         # value of session is encryted (auth_token and spotify_id is inside session)
         if active_user and active_user.auth_token == session["auth_token"]:

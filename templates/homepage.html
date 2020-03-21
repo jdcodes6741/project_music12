@@ -11,18 +11,37 @@
 {% block content %}
     {% if active_user %}
         <h1>Listen To Music From The World!</h1>
-        <p>Hello, {{active_user.display_name}}
-    <div id="world-map" style="width: 600px; height: 400px"></div>
-    <script>
-        $(function(){
-            $('#world-map').vectorMap({
-                map: 'world_merc',
-                onRegionClick: function(_, code) {
-                    console.log(`${code}`);
-                }
+        <p>Hello, {{active_user.display_name}}</p>
+
+        <form action="/search" method="get" >
+            <!--the name="q" is the name of the key in the query param (e.g. /search?q=intentions) -->
+            <input type="text" name="q" placeholder="search for music">
+            <input type="submit">
+        </form>
+        <br>
+
+        <!-- id=world-map, the scripts in the header will modify this div. The scrips above in the header creates the map-->
+        <div id="world-map" style="width: 600px; height: 400px"></div>
+        <script>
+            // if it is a function inside the $, jquery will run the function when the DOM is finished loading.
+            $(function(){
+                // query selector: jquery selecting a DOM element like div with the id='world-map'
+                // $('#world-map'): inside is a string so it is a query selector and the jquery will select the element from the DOM that has the id #world-map
+                // vectormap function is a custom function created by the vector map library. vectorMap takes a javascript object (dictionary) as input 
+                // 1. first key "map" tells the world-map (div id="world-map") to render "world-merc" map in script tag above
+                // 2. onRegionClick: click handler when you click on the region for the world map. Every time you click a country, it is going to run the function
+                // (map & onRegionClick)
+                $('#world-map').vectorMap({
+                    map: 'world_merc',
+                    // Event handling, first parameter not used. Vectormap will call the function below and will provide input, which is the country code.
+                    onRegionClick: function(_, code) {
+                        // redirect to country_playlist page for the clicked country with javascript
+                        // https://stackoverflow.com/questions/4744751/how-do-i-redirect-with-javascript
+                        window.location.replace(`/country_playlist/${code}`);
+                    }
+                });
             });
-        });
-    </script>
+        </script>
     {% else %}
         <button><a href="/login">Login</a></button>
     {% endif %}

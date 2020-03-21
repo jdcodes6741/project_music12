@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <h1>Searches for "{{search_string}}"</h1>
+    <div>
+        <ol>
+            {% for song in search_items['items'] %}
+                <li>
+                    <a href="{{'/song/'+song['id']}}">{{song['name'] + " - " + song['artists'][0]['name']}}</a>
+                </li>
+            {% endfor %}
+        </ol>
+    </div>
+{% endblock %}

@@ -30,6 +30,12 @@ class User(db.Model):
     def set_new_auth_token(self):
         self.auth_token = token_urlsafe()
         return self.auth_token
+
+    
+    def get_auth_header(self):
+        return {
+            'Authorization': f'Bearer {self.access_token}'
+        }
     
     def save(self):
         db.session.add(self)
@@ -41,13 +47,13 @@ class CountryPlaylist(db.Model):
 
     __tablename__ = "country_playlists"
 
-    playlist_id = db.Column(db.String, primary_key=True)
-    display_name = db.Column(db.String(50), nullable=False, default='playlist')
-    country_code = db.Column(db.String(50), nullable=False)
+    country_code = db.Column(db.String(50), primary_key=True)
+    playlist_id = db.Column(db.String, nullable=False)
+    
 
     def __repr__(self):
         """Return a human-readable representation of a CountryPlaylist."""
-        return f"<CountryPlaylist class - {self.display_name}>"
+        return f"<CountryPlaylist class - {self.country_code}>"
 
 # Standard function, pass in the application inside server.py
 # Can pull information from the database onto our server (you can read and write to the database)
