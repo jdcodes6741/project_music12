@@ -7,6 +7,7 @@
         <ol>
             {% for song in search_items['items'] %}
                 <li>
+                    <!-- anchor tag will automatically redirect user to /song route -->
                     <a href="{{'/song/'+song['id']}}">{{song['name'] + " - " + song['artists'][0]['name']}}</a>
                 </li>
             {% endfor %}

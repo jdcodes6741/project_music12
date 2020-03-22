@@ -31,7 +31,7 @@ class User(db.Model):
         self.auth_token = token_urlsafe()
         return self.auth_token
 
-    
+    # format the access token into the header (for request to SPOTIFY API)
     def get_auth_header(self):
         return {
             'Authorization': f'Bearer {self.access_token}'

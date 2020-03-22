@@ -44,6 +44,18 @@ app.secret_key="ABC"
 SPOTIFY_CLIENT_ID= os.getenv('SPOTIFY_CLIENT_ID')
 SPOTIFY_APP_SECRET= os.getenv('SPOTIFY_APP_SECRET')
 
+
+spotify_access_scopes = [
+    "streaming",
+    "user-read-email",
+    "user-read-private",
+    "user-read-playback-state",
+    "user-modify-playback-state",
+    "user-read-currently-playing",
+    "app-remote-control",
+]
+
+
 # Homepage
 @app.route('/')
 def homepage():
@@ -54,24 +66,58 @@ def homepage():
 # dynamic routing (placeholder <country_code>)
 @app.route('/country_playlist/<country_code>')
 def country_playlist(country_code):
+    # check user's auth_token with our database to see if they are who they say they are or they need to login/create account
     active_user = check_auth_and_fetch_current_user()
     if not active_user:
         return redirect('/')
 
+    # go to country_playlists table and use the country_code to find the playlist. If playlist not found, use the 
+    # GLOBAL playlist.
+    # playlist = store a country_playlist object (an instance)
     playlist = CountryPlaylist.query.get(country_code)
     if not playlist:
         playlist = CountryPlaylist.query.get('GLOBAL')
 
     # https://developer.spotify.com/documentation/web-api/reference/playlists/get-playlist/
-    playlist_url = "https://api.spotify.com/v1/playlists/"
+    # playlist is an instance. playlist_id is an attribute.
+    playlist_url = f"https://api.spotify.com/v1/playlists/{playlist.playlist_id}"
 
     # https://developer.spotify.com/documentation/web-api/reference/playlists/get-playlist/ (-H)
     # https://requests.readthedocs.io/en/master/user/quickstart/#make-a-request
+    # every time we make a request to spotify, we have to include the access token in the header (according to Spotify's API)
     # get_auth_header() returns the header with the access token (this is needed for Spotify in order to verify the user has access)
-    response = requests.get(playlist_url+playlist.playlist_id, headers=active_user.get_auth_header())
+    response = requests.get(playlist_url, headers=active_user.get_auth_header())
+
+    if not response.ok:
+        active_user.set_new_auth_token()
+        active_user.save()
+        return redirect("/")
+
     current_playlist = response.json()
     # return current_playlist
     return render_template('country_playlist.html', current_playlist=current_playlist, current_user=active_user)
+
+
+# <> dynamic routing. When we have a request coming in, flask will look at the second part and pass in the items inside <> as a parameter
+@app.route('/song/<song_id>')
+def song(song_id):
+    active_user = check_auth_and_fetch_current_user()
+    if not active_user:
+        return redirect('/')
+
+    # https://developer.spotify.com/documentation/web-api/reference/tracks/get-track/
+    # every time we make a request to spotify, we have to include the access token in the header (according to Spotify's API)
+    song_url = f"https://api.spotify.com/v1/tracks/{song_id}"
+    response = requests.get(song_url, headers=active_user.get_auth_header())
+
+    if not response.ok:
+        active_user.set_new_auth_token()
+        active_user.save()
+        return redirect("/")
+
+    current_song = response.json()
+
+    return render_template('song.html', current_song=current_song, current_user=active_user)
 
 
 # Login page which redirect to spotify
@@ -81,12 +127,15 @@ def login():
     params={
         "response_type": "code",
         "client_id": SPOTIFY_CLIENT_ID,
-        "redirect_uri": "http://localhost:5000/auth/callback"
+        "redirect_uri": "http://localhost:5000/auth/callback",
+        "scope": urllib.parse.quote(" ".join(spotify_access_scopes)),
     }
     
     # Converts dictionary into query string
     # https://accounts.spotify.com/authorize?response_type=token&client_id=b51004b00f3841c4a5a7734a69c80576&redirect_uri=http%3A%2F%2Flocalhost%3A5000%2Fauth%2Fcallback
     # urlencode converts space too
+    # redirect does not support passing in query params as a dictionary, we have to create a query string ourselves using 
+    # urllib.parse.urlencode
     query = urllib.parse.urlencode(params)
     return redirect(url+'?'+query)
 
@@ -198,15 +247,18 @@ def search():
     '''
         renders search page populated with songs from spotify
     '''
-    # not going to make a request to spotify until we know you are a real user. 
+    # Not going to make a request to spotify until we know you are a real user. If user is not an active user, will return None
     active_user = check_auth_and_fetch_current_user()
     if not active_user:
         return redirect('/')
 
-    # takes the query parameter and turn it into a dictionary
+    # takes the query parameter from the url and turn it into a dictionary (included in the query parameter are keywords the user searched for in homepage.html)
     # {"q": "intentions"}
     params = request.args
-    # this "q" key matches the name="q" in homepage.html
+
+    # return params
+
+    # this "q" key matches the name="q" in homepage.html, want to get the "value" of what the user searched
     search_string = params["q"]
 
     # https://developer.spotify.com/documentation/web-api/reference/search/search/
@@ -220,7 +272,17 @@ def search():
     # every time we make a request to spotify, we have to include the access token in the header (according to Spotify's API)
     # example of what the request looks like: https://api.spotify.com/v1/search?q=intentions&type=track&limit=20
     response = requests.get(search_url, params=search_params, headers=active_user.get_auth_header())
+
+    if not response.ok:
+        active_user.set_new_auth_token()
+        active_user.save()
+        return redirect("/")
+
+    # converts response object into a dictionary 
     search_items = response.json()
+
+    # return search_items
+
     return render_template('search_page.html', search_string=search_string, search_items=search_items['tracks'], current_user=active_user)
 
 
@@ -241,6 +303,7 @@ def check_auth_and_fetch_current_user():
         # value of session is encryted (auth_token and spotify_id is inside session)
         if active_user and active_user.auth_token == session["auth_token"]:
             return active_user
+
 
 
 if __name__ == "__main__":
