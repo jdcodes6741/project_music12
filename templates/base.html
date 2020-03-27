@@ -2,10 +2,34 @@
 <html>
 <head>
     {% block title %}<title>Globify</title>{% endblock %}
-    {% block head %}{% endblock %}
     <link rel="stylesheet" type="text/css" href="/static/styles.css">
+    <script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
+    {% block head %}{% endblock %}
 </head>
 <body>
+    {% if current_user %}
+        <div class="top-bar">
+            <div class="home-hub">
+                <div class="home-button">Home &#127760;</div>
+                <div class="welcome-title">Welcome, {{current_user.display_name}}</div>
+            </div>
+            
+            <form action="/logout" method="get" >
+                <input name="logout" class="logout" type="submit" value="logout"/>
+            </form>
+        </div>
+    {% else %}
+        <div class="top-bar-login">
+            <form action="/login" method="get" >
+                <input name="login" class="login" type="submit" value="login"/>
+            </form>
+        </div>
+    {% endif %}
     {% block content %} CONTENT GOES HERE {% endblock %}
+    <script>
+        $('.home-button').click(function(){
+            window.location.href = "/"
+        })
+    </script>
 </body>
 </html>

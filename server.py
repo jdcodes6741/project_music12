@@ -22,7 +22,7 @@ session = a global variable (look at flask sourcecode) Session object
 
 
 """
-from flask import Flask, redirect, request, render_template, session
+from flask import Flask, redirect, request, render_template, session, flash
 from flask_debugtoolbar import DebugToolbarExtension
 from jinja2 import StrictUndefined
 import requests
@@ -44,11 +44,17 @@ app.secret_key="ABC"
 SPOTIFY_CLIENT_ID= os.getenv('SPOTIFY_CLIENT_ID')
 SPOTIFY_APP_SECRET= os.getenv('SPOTIFY_APP_SECRET')
 
-
+# https://developer.spotify.com/documentation/web-playback-sdk/quick-start/#authenticating-with-spotify
+# required scopes in order to play music on my song page
 spotify_access_scopes = [
     "streaming",
     "user-read-email",
     "user-read-private",
+    # https://developer.spotify.com/documentation/general/guides/scopes/
+    # Scope for Spotify Connect
+    # Spotify connect allows you to play high-quality Spotify music (in 320kbps) through a compatible wireless 
+    # audio product - including a Wi-Fi connected speaker, soundbar, AV receiver, television, Chromecast, PC, and much more.
+    # Your music will play from Spotify's servers to your connected audio product, allowing you to use your smartphone for other tasks. 
     "user-read-playback-state",
     "user-modify-playback-state",
     "user-read-currently-playing",
@@ -61,7 +67,7 @@ spotify_access_scopes = [
 def homepage():
     active_user = check_auth_and_fetch_current_user()
     
-    return render_template('homepage.html', active_user=active_user)
+    return render_template('homepage.html', current_user=active_user)
 
 # dynamic routing (placeholder <country_code>)
 @app.route('/country_playlist/<country_code>')
@@ -69,6 +75,7 @@ def country_playlist(country_code):
     # check user's auth_token with our database to see if they are who they say they are or they need to login/create account
     active_user = check_auth_and_fetch_current_user()
     if not active_user:
+        flash('Session expired. Please login again.')
         return redirect('/')
 
     # go to country_playlists table and use the country_code to find the playlist. If playlist not found, use the 
@@ -103,6 +110,7 @@ def country_playlist(country_code):
 def song(song_id):
     active_user = check_auth_and_fetch_current_user()
     if not active_user:
+        flash('Session expired. Please login again.')
         return redirect('/')
 
     # https://developer.spotify.com/documentation/web-api/reference/tracks/get-track/
@@ -139,6 +147,14 @@ def login():
     query = urllib.parse.urlencode(params)
     return redirect(url+'?'+query)
 
+@app.route('/logout')
+def logout():
+    active_user = check_auth_and_fetch_current_user()
+    if active_user:
+        active_user.set_new_auth_token()
+        active_user.save()
+
+    return redirect("/")
 
 # get spotify user code in order to create a token
 # auth/callback is only when a user logs in our app, once they log in, all subequent request will use the same access token
@@ -239,6 +255,7 @@ def auth():
     # on every request. That is how we can read from server.py
     session['spotify_id'] = spotify_id
 
+    flash('You were successfully logged in')
     return redirect('/')
 
 
@@ -250,6 +267,7 @@ def search():
     # Not going to make a request to spotify until we know you are a real user. If user is not an active user, will return None
     active_user = check_auth_and_fetch_current_user()
     if not active_user:
+        flash('Session expired. Please login again.')
         return redirect('/')
 
     # takes the query parameter from the url and turn it into a dictionary (included in the query parameter are keywords the user searched for in homepage.html)

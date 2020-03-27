@@ -1,13 +1,227 @@
+body {
+    background-color: black;
+    height: 100vh;
+    color: white;
+}
+
+.landing-page-title {
+    font-size: 60px;
+    position: absolute;
+}
+
+.top-bar {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100vw;
+    height: 30px;
+    background-color: transparent;
+    z-index: 9999;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
+}
+
+.top-bar-login {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100vw;
+    height: 30px;
+    background-color: transparent;
+    z-index: 9999;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-direction: row;
+}
+
+.home-hub {
+    margin-top: 40px;
+    margin-left: 25px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+
+.home-button {
+    background-color: transparent;
+    border-radius: 15px;
+    padding: 3px 5px;
+    border-width: 3px;
+    border-color: white;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    border-style: solid;
+    text-align: center;
+    cursor: pointer;
+    width: 85px;
+}
+
+.welcome-title {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    color: white;
+    margin-left: 25px;
+}
+
+.home-button:hover {
+    color: black;
+    background-color: white;
+}
+
 #world-map {
     max-width: 800px;
 }
 
+.page-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    height: 100%;
+}
+
+.title-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    padding-top: 40px;
+    height: 15%;
+}
+
+/* displaying items */
+.display-container {
+    display: flex;
+    height: 85%;
+}
+
+.display-image-content-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 400px;
+}
+
+.display-image-content-image {
+    width: 300px;
+}
+
+.items-display-item {
+    border-width: 5px;
+    border-style: solid;
+    text-align: center;
+    border-color: lightgray;
+    margin: 5px;
+    border-radius: 50px;
+    font-size: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+}
+.items-display-item:hover {
+    border-color: turquoise;
+    color: turquoise;
+}
+
+.items-display-container {
+    display: flex;
+    justify-content: center;
+    width: 550px;
+    overflow: scroll;
+}
+
+.items-display-image{
+    height: 60px;
+}
+
+.items-display-title{
+    padding: 15px 20px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.items-display-list {
+}
+
+#search{
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.search-input {
+    border-radius: 15px;
+    padding: 8px 25px;
+    border-width: 0px;
+    margin: 0px 10px;
+}
+
+.search-button {
+    padding: 5px;
+    background-color: turquoise;
+    font-size: 14px;
+    border-radius: 15px;
+    margin: 0px 10px;
+}
+
+.login {
+    padding: 5px 25px;
+    margin-top: 45px;
+    margin-right: 25px;
+    background-color: transparent;
+    border-radius: 15px;
+    height: 35px;
+    width: 85px;
+    border-width: 3px;
+    border-color: white;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.login:hover {
+    color: black;
+    background-color: white;
+}
+
+.logout {
+    margin-top: 45px;
+    margin-right: 25px;
+    background-color: transparent;
+    border-radius: 15px;
+    height: 35px;
+    width: 85px;
+    border-width: 3px;
+    border-color: white;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.logout:hover {
+    color: black;
+    background-color: white;
+}
+
+.world-rotate {
+    height: 90vh;
+}
+
 /* css for song page */
 
-body{
-    margin: 0px;
-    padding: 0px;
-}
 #bg{
     height: 100vh;
     width: 100%;
@@ -23,6 +237,7 @@ body{
     transform: translate(-50%,-50%);
     z-index: 1;
 }
+
 #blackLayer{
     height: 100vh;
     width: 100%;
@@ -30,9 +245,10 @@ body{
     position: absolute;
     z-index: 99;
 }
+
 #main{
     width: 400px;
-    background-color:#fff;
+    background-color: transparent;
     border-radius: 15px;
     position: absolute;
     top:50%;
@@ -40,6 +256,11 @@ body{
     transform: translate(-50%,-50%);
     z-index: 999;
 }
+
+#image {
+    display: flex;
+}
+
 #image img{
     height: 400px;
     width: 100%;
@@ -47,28 +268,36 @@ body{
     border-top-left-radius: 15px;
     border-top-right-radius: 15px;
 }
+
 #player{
     padding: 25px;
-    color:#333;
+    color: white;
+    background-color: black;
+    opacity: 0.5;
+    border-radius: 0px 0px 15px 15px;
 }
+
 #songTitle{
     width: 100%;
     text-align: center;
-    font-family: monospace;
+    font-family: Arial, Helvetica, sans-serif;
     font-size: 18px;
     top:60%;
     left: 50%;
 }
+
 #buttons{
     height: 50px;
     width: 100%;
-    margin-top: 50px;
-    position:relative;
+    margin: 25px 0px;
     top:10%;
     left: 50%;
-    transform: translate(-50%,-50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
-#play,#next,#pre{
+
+#play {
     width: 50px;
     height: 50px;
     border: 0;
@@ -76,27 +305,14 @@ body{
     border-radius: 50%;
     outline: none;
     cursor: pointer;
-    position: absolute;
-    top:50%;
-    left: 50%;
-    transform: translate(-50%,-50%);
 }
-#next{
-    width: 30px;
-    height: 30px;
-    left: 70%;
+
+.play-time {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    margin: 0px 20px;
 }
-#pre{
-    width: 30px;
-    height: 30px;
-    left: 30%;
-}
-#play img,#next img,#pre img{
-    position: absolute;
-    top:50%;
-    left: 50%;
-    transform: translate(-50%,-50%);
-}
+
 #seek-bar{
     width: 300px;
     height: 5px;
@@ -106,6 +322,7 @@ body{
     margin-left: 25px;
     cursor: pointer;
 }
+
 #fill{
     height: 5px;
     background-color:royalblue;
@@ -119,4 +336,3 @@ body{
     margin-left: -5px;
     transform: scale(2);
 }
-

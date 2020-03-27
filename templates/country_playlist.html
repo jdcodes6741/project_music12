@@ -1,22 +1,42 @@
 {% extends "base.html" %}
 
 {% block content %}
-
-    <h1>Listen To Music From {{current_playlist['name']}}</h1>
-    <p>{{current_playlist['description']}}</p>
-    {% if current_playlist['images'] %}
-        <img src="{{current_playlist['images'][0]['url']}}"></img>
-    {% else %}
-        <img src="https://geology.com/google-earth/google-earth.jpg"></img>
-    {% endif %}
-    <div>
-        <ol>
-            {% for song in current_playlist['tracks']['items'] %}
-                <li>
-                    <a href="{{'/song/'+song['track']['id']}}">{{song['track']['name']}}</a>
-                </li>
-            {% endfor %}
-        </ol>
+    <div class="page-container">
+        <div class="title-container">
+            <h1>Listen To Music From {{current_playlist['name']}}</h1>
+            <p>{{current_playlist['description']}}</p>
+        </div>
+        
+        <div class="display-container">
+            <div class="display-image-content-container">
+                {% if current_playlist['images'] %}
+                    <img class="display-image-content-image" src="{{current_playlist['images'][0]['url']}}"></img>
+                {% else %}
+                    <img class="display-image-content-image" src="https://geology.com/google-earth/google-earth.jpg"></img>
+                {% endif %}
+            </div>
+            <div class="items-display-container">
+                <ol class="items-display-list">
+                    {% for song in current_playlist['tracks']['items'] %}
+                        <li class="items-display-item" onclick="location.href = '{{'/song/'+song['track']['id']}}';" image_src="{{song['track']['album']['images'][0]['url']}}">
+                            <img class="items-display-image" src="{{song['track']['album']['images'][0]['url']}}"/>
+                            <div class=items-display-title>
+                                {{song['track']['name'] + " - " + song['track']['album']['artists'][0]['name']}}
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ol>
+            </div>      
+        </div>
     </div>
-
+    <script>
+        $('.items-display-item').mouseover(function(e){
+            const element = e.currentTarget;
+            const image = $('.display-image-content-image')[0];
+            image.src = element.getAttribute('image_src');
+        }).mouseout(function(e){
+            const image = $('.display-image-content-image')[0];
+            image.src = "{{current_playlist['images'][0]['url']}}";
+        })
+    </script>
 {% endblock %}

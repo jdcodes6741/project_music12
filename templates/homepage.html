@@ -5,45 +5,62 @@
     <script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
     <script src="/static/jquery-jvectormap-2.0.5.min.js"></script>
     <script src="/static/jquery-jvectormap-world-merc.js"></script>
-
 {% endblock %}
 
 {% block content %}
-    {% if active_user %}
-        <h1>Listen To Music From The World!</h1>
-        <p>Hello, {{active_user.display_name}}</p>
+    <div class="page-container">
+        {% if current_user %}
+            <div class="title-container">
+                <h1>Explore new languages</h1>
+                <h2>Click on a country to start listening</h2>
+            </div>
+            <div class="search-container">
+                <form id="search" action="/search" method="get" >
+                    <!--the name="q" is the name of the key in the query param (e.g. /search?q=intentions) -->
+                    <input class="search-input" type="text" name="q" placeholder="search for music">
+                    <!-- <input class="search-button" type="submit"> -->
+                </form>
+            </div>
+            <div class="display-container">
+                <!-- id=world-map, the vectormap function below will modify the div tag to create the map-->
+                <div id="world-map" style="width: 1200px; height: 600px"></div>
+            </div>
+        {% else %}
+            <h1 class="landing-page-title">Listen to music from the world</h1>
+            <video class="world-rotate" autoplay loop>
+              <source src="/static/world_rotate.webm" type="video/webm">
+              Your browser does not support HTML5 video.
+            </video>
+        {% endif %}
+    </div>
 
-        <form action="/search" method="get" >
-            <!--the name="q" is the name of the key in the query param (e.g. /search?q=intentions) -->
-            <input type="text" name="q" placeholder="search for music">
-            <input type="submit">
-        </form>
-        <br>
-
-        <!-- id=world-map, the vectormap function below will modify the div tag to create the map-->
-        <div id="world-map" style="width: 600px; height: 400px"></div>
-        <script>
-            // if it is a function inside the $, jquery will run the function when the DOM is finished loading.
-            $(function(){
-                // query selector: jquery selecting a DOM element like div with the id='world-map'
-                // $('#world-map'): input is a string so it is a query selector and the jquery will select the element from the DOM that has the id #world-map
-                // vectormap function is a custom function created by the vector map library. vectorMap takes a javascript object (dictionary) as input 
-                // 1. first key "map" tells the world-map (div id="world-map") to render "world-merc" map in script tag above (according to the tutorial, the map value needs to be imported in the script tags). By running the vectorMap function, the element with the id=world-map is going to be generated with the map in the input object for vectorMap.
-                // 2. onRegionClick: click handler when you click on the region for the world map. Every time you click a country, it is going to run the function
-                // (map & onRegionClick)
-                $('#world-map').vectorMap({
-                    map: 'world_merc',
-                    // Event handling, first parameter not used. Vectormap will call the function below and will provide input, which is the country code.
-                    onRegionClick: function(_, code) {
-                        // window.location.replace = javascript client redirect (not server redirect, client telling itself to redirect). Redirect to country_playlist page for the clicked country with javascript
-                        // https://stackoverflow.com/questions/4744751/how-do-i-redirect-with-javascript
-                        window.location.replace(`/country_playlist/${code}`);
-                    }
-                });
+    <script>
+        // if it is a function inside the $, jquery will run the function when the DOM is finished loading.
+        $(function(){
+            // query selector: jquery selecting a DOM element like div with the id='world-map'
+            // $('#world-map'): input is a string so it is a query selector and the jquery will select the element from the DOM that has the id #world-map
+            // vectormap function is a custom function created by the vector map library. vectorMap takes a javascript object (dictionary) as input 
+            // 1. first key "map" tells the world-map (div id="world-map") to render "world-merc" map in script tag above (according to the tutorial, the map value needs to be imported in the script tags). By running the vectorMap function, the element with the id=world-map is going to be generated with the map in the input object for vectorMap.
+            // 2. onRegionClick: click handler when you click on the region for the world map. Every time you click a country, it is going to run the function
+            // (map & onRegionClick)
+            $('#world-map').vectorMap({
+                map: 'world_merc',
+                backgroundColor: 'black',
+                regionStyle: {
+                    hover: {
+                        fill: 'turquoise',
+                    },
+                },
+                zoomOnScroll: false,
+                zoomMax: 1,
+                // Event handling, first parameter not used. Vectormap will call the function below and will provide input, which is the country code.
+                onRegionClick: function(_, code) {
+                    // window.location.replace = javascript client redirect (not server redirect, client telling itself to redirect). Redirect to country_playlist page for the clicked country with javascript
+                    // https://stackoverflow.com/questions/4744751/how-do-i-redirect-with-javascript
+                    window.location.href = `/country_playlist/${code}`;
+                }
             });
-        </script>
-    {% else %}
-        <button><a href="/login">Login</a></button>
-    {% endif %}
+        });
+    </script>
 
 {% endblock %}

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block head %}
-<script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -19,16 +19,15 @@
                 {% endif %}
             </div>
             <div id="player">
-                <div id="songTitle">{{current_song['name']}}</div>
+                <div id="songTitle">{{current_song['name'] + " - " + current_song['artists'][0]['name']}}</div>
                 <div id="buttons">
-                    <button id="pre" onclick="pre()"><img src="/static/Pre.png" height="90%" width="90%"/></button>
-                    <button id="play"><img src="/static/Pause.png"/></button>
-                    <button id="next" onclick="next()"><img src="/static/Next.png" height="90%" width="90%"/></button>
+                    <div id="start-time" class="play-time">0:00</div>
+                    <button id="play"><i id="button-icon" class="material-icons">pause</i></button>
+                    <div id="end-time" class="play-time">0:00</div>
                 </div>
                 
                 <div id="seek-bar">
                     <div id="fill"></div>
-                    <div id="handle"></div>
                 </div>
             </div>
         </div>
@@ -36,6 +35,7 @@
     <script src="https://sdk.scdn.co/spotify-player.js"></script>
     <script>
         // https://developer.spotify.com/documentation/web-playback-sdk/quick-start/
+        // created new event listener (load music player)
         window.onSpotifyWebPlaybackSDKReady = () => {
             const token = "{{current_user.access_token}}";
             const player = new Spotify.Player({
@@ -45,6 +45,9 @@
             const songTitle = document.getElementById("songTitle");
             const fillBar = document.getElementById("fill");
 
+            var clicked = false;
+            const duration = {{current_song['duration_ms']}};
+
             // Error handling
             player.addListener('initialization_error', ({ message }) => { console.error(message); });
             player.addListener('authentication_error', ({ message }) => { console.error(message); });
@@ -52,7 +55,7 @@
             player.addListener('playback_error', ({ message }) => { console.error(message); });
 
             // Playback status updates
-            player.addListener('player_state_changed', state => { console.log(state); });
+            // player.addListener('player_state_changed', state => { console.log(state); });
     
             // Ready
             player.addListener('ready', ({ device_id }) => {
@@ -66,7 +69,7 @@
     
             // Not Ready
             player.addListener('not_ready', ({ device_id }) => {
-            console.log('Device ID has gone offline', device_id);
+                console.log('Device ID has gone offline', device_id);
             });
 
             // https://developer.spotify.com/documentation/web-playback-sdk/reference/#api-spotify-player-previoustrack
@@ -79,8 +82,6 @@
                     }
                 }}) => {
                     getOAuthToken(access_token => {
-                        console.log(access_token)
-                        console.log(token)
                         fetch(`https://api.spotify.com/v1/me/player/play?device_id=${id}`, {
                         method: 'PUT',
                         body: JSON.stringify({ uris: [spotify_uri] }),
@@ -93,24 +94,57 @@
                 };
 
             function getState() {
-                setTimeout(getState,1000)
+                setTimeout(getState, 1000)
                 player.getCurrentState().then(state => {
-                    const position = state.position / state.duration
+                    if (state.paused) {
+                        $("#button-icon").html("play_arrow");
+                    } else {
+                        $("#button-icon").html("pause");
+                    }
+                    const position = state.position / state.duration;
                     fillBar.style.width = position * 100 +'%';
+
+                    const currentMS = Math.floor(position*duration);
+                    const currentTime = Math.floor(currentMS/(60*1000)) + ":" + Math.floor((currentMS/1000)%60).toString().padStart(2, "0");
+                    const totalTime = Math.floor(duration/(60*1000)) + ":" + Math.floor((duration/1000)%60).toString().padStart(2, "0");
+                    $("#start-time").html(currentTime);
+                    $("#end-time").html(totalTime);
                 })
             }
+
 
             const playButton = document.getElementById("play");
             playButton.onclick = function() {
                 player.getCurrentState().then(state => {
                     if (state.paused) {
-                        player.resume()
-                        $("#play img").attr("src","/static/Pause.png");
+                        player.resume();
+                        $("#button-icon").html("pause");
                     } else {
-                        player.pause()
-                        $("#play img").attr("src","/static/Play.png");
+                        player.pause();
+                        $("#button-icon").html("play_arrow");
                     }
                 })  
+            }
+            
+            const progressBar = document.getElementById("seek-bar");
+            progressBar.onmousedown = function(e){
+                clicked = true;
+                const progress = e.offsetX/300;
+                player.seek(progress*duration);
+            }
+
+            progressBar.onmouseup = function(e){
+                clicked = false;
+            }
+            progressBar.onmouseleave = function(e){
+                clicked = false;
+            }
+
+            progressBar.onmousemove = function(e){
+                if (clicked === true) {
+                    const progress = e.offsetX/300;
+                    player.seek(progress*duration);
+                }
             }
             
             // Connect to the player!

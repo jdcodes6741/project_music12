@@ -1,16 +1,37 @@
 {% extends "base.html" %}
 
 {% block content %}
-
-    <h1>Searches for "{{search_string}}"</h1>
-    <div>
-        <ol>
-            {% for song in search_items['items'] %}
-                <li>
-                    <!-- anchor tag will automatically redirect user to /song route -->
-                    <a href="{{'/song/'+song['id']}}">{{song['name'] + " - " + song['artists'][0]['name']}}</a>
-                </li>
-            {% endfor %}
-        </ol>
+    <div class="page-container">
+        <div class="title-container">
+            <h1>Searches for "{{search_string}}"</h1>
+        </div>
+        
+        <div class="display-container">
+            <div class="display-image-content-container">
+                <img class="display-image-content-image" src="https://geology.com/google-earth/google-earth.jpg"></img>
+            </div>
+            <div class="items-display-container">
+                <ol class="items-display-list">
+                    {% for song in search_items['items'] %}
+                        <li class="items-display-item" onclick="location.href = '{{'/song/'+song['id']}}';" image_src="{{song['album']['images'][0]['url']}}">
+                            <img class="items-display-image" src="{{song['album']['images'][0]['url']}}"/>
+                            <div class=items-display-title>
+                                {{song['name'] + " - " + song['artists'][0]['name']}}
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ol>
+            </div>      
+        </div>
     </div>
+    <script>
+        $('.items-display-item').mouseover(function(e){
+            const element = e.currentTarget;
+            const image = $('.display-image-content-image')[0];
+            image.src = element.getAttribute('image_src');
+        }).mouseout(function(e){
+            const image = $('.display-image-content-image')[0];
+            image.src = "https://geology.com/google-earth/google-earth.jpg";
+        })
+    </script>
 {% endblock %}
