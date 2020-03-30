@@ -45,7 +45,7 @@ SPOTIFY_CLIENT_ID= os.getenv('SPOTIFY_CLIENT_ID')
 SPOTIFY_APP_SECRET= os.getenv('SPOTIFY_APP_SECRET')
 
 # https://developer.spotify.com/documentation/web-playback-sdk/quick-start/#authenticating-with-spotify
-# required scopes in order to play music on my song page
+# required scopes in order to play music on my song page (allows me to control the user's music player)
 spotify_access_scopes = [
     "streaming",
     "user-read-email",
@@ -115,6 +115,8 @@ def song(song_id):
 
     # https://developer.spotify.com/documentation/web-api/reference/tracks/get-track/
     # every time we make a request to spotify, we have to include the access token in the header (according to Spotify's API)
+    # Gets information about the song to be displayed on my song.html page (Information includes: 
+    # song title, duration, author, song image, albulm information--not used)
     song_url = f"https://api.spotify.com/v1/tracks/{song_id}"
     response = requests.get(song_url, headers=active_user.get_auth_header())
 
@@ -188,7 +190,7 @@ def auth():
     # this is the response from spotify, and we converted it to a dictionary using .json()
     response_json = response.json()
 
-    print(response_json)
+    # print(response_json)
     # return response_json
 
     # we extract the access token from the response

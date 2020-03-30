@@ -1,8 +1,13 @@
 {% extends "base.html" %}
 
 {% block head %}
+    <!-- 2d world map javascript -->
+    <!-- https://jvectormap.com/tutorials/getting-started/ -->
     <link rel="stylesheet" href="/static/jquery-jvectormap-2.0.5.css" type="text/css" media="screen"/>
+    <!-- https://developers.google.com/speed/libraries -->
+    <!-- https://code.jquery.com/ import jquery using this website-->
     <script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
+    <!-- https://jvectormap.com/tutorials/getting-started/ -->
     <script src="/static/jquery-jvectormap-2.0.5.min.js"></script>
     <script src="/static/jquery-jvectormap-world-merc.js"></script>
 {% endblock %}
@@ -11,8 +16,8 @@
     <div class="page-container">
         {% if current_user %}
             <div class="title-container">
-                <h1>Explore new languages</h1>
-                <h2>Click on a country to start listening</h2>
+                <h1 class="homepage-title">Explore new languages</h1>
+                <p>Click on a country to start listening</p>
             </div>
             <div class="search-container">
                 <form id="search" action="/search" method="get" >
@@ -23,10 +28,14 @@
             </div>
             <div class="display-container">
                 <!-- id=world-map, the vectormap function below will modify the div tag to create the map-->
+
+                <!-- https://jvectormap.com/tutorials/getting-started/ -->
+                <!-- jquery is a javascript library used to help us select elements, make AJAX request, and more -->
                 <div id="world-map" style="width: 1200px; height: 600px"></div>
             </div>
         {% else %}
             <h1 class="landing-page-title">Listen to music from the world</h1>
+            <!-- https://www.w3schools.com/html/html5_video.asp -->
             <video class="world-rotate" autoplay loop>
               <source src="/static/world_rotate.webm" type="video/webm">
               Your browser does not support HTML5 video.
@@ -54,8 +63,11 @@
                 zoomOnScroll: false,
                 zoomMax: 1,
                 // Event handling, first parameter not used. Vectormap will call the function below and will provide input, which is the country code.
+                // Tutorial in the documentation
                 onRegionClick: function(_, code) {
+                    // console.log(code)
                     // window.location.replace = javascript client redirect (not server redirect, client telling itself to redirect). Redirect to country_playlist page for the clicked country with javascript
+                    // https://stackoverflow.com/questions/503093/how-do-i-redirect-to-another-webpage
                     // https://stackoverflow.com/questions/4744751/how-do-i-redirect-with-javascript
                     window.location.href = `/country_playlist/${code}`;
                 }

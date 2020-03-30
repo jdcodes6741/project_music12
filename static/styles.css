@@ -68,6 +68,10 @@ body {
     margin-left: 25px;
 }
 
+.homepage-title {
+    margin-bottom: 0px;
+}
+
 .home-button:hover {
     color: black;
     background-color: white;
@@ -103,8 +107,11 @@ body {
 }
 
 .display-image-content-container {
+    /*https://www.w3schools.com/css/css3_flexbox.asp*/
     display: flex;
+    /*Horizontal center*/
     justify-content: center;
+    /*Vertical center*/
     align-items: center;
     width: 400px;
 }

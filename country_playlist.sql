@@ -1,5 +1,9 @@
 -- psql music -a -f country_playlist.sql 
+-- Run the file in the music database
+-- https://www.postgresql.org/docs/9.5/app-psql.html
 -- https://open.spotify.com/playlist/37i9dQZEVXbKfIuOAZrk7G
+-- In my country playlist table, the country_code corresponds to the code from my jvectormap & the playlist_id
+-- corresponds to the playlist of the country's top 50 songs in spotify.
 
 INSERT INTO country_playlists (country_code, playlist_id)
 VALUES 
@@ -31,7 +35,7 @@ VALUES
 -- Greece
 ('GR', '37i9dQZEVXbJqdarpmTJDL'),
 -- India
-('IN', '37i9dQZEVXbK4NvPi6Sxit'),
+('IN', '24ToMDjkwvwWFhXQzrEydv'),
 -- Iran
 ('IR', '6I2Mm0UoSgb1nuF4LbrQYh'),
 -- Indonesia
@@ -73,5 +77,7 @@ VALUES
 -- Turkey
 ('TR', '37i9dQZEVXbIVYVBNw9D5K'),
 --Thailand
-('TH', '37i9dQZEVXbMnz8KIWsvf9');
+('TH', '37i9dQZEVXbMnz8KIWsvf9'),
+--Vietnam
+('VN', '0UOuxXm0JMSfn5ESI2NBPo');
 

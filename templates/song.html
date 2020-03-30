@@ -32,47 +32,61 @@
             </div>
         </div>
 
+    <!-- This imports the Spotify Playback SDK library. All logic about the music player is stored in this library. -->
     <script src="https://sdk.scdn.co/spotify-player.js"></script>
     <script>
         // https://developer.spotify.com/documentation/web-playback-sdk/quick-start/
         // created new event listener (load music player)
         window.onSpotifyWebPlaybackSDKReady = () => {
+            // access token of the user in order to stream music
             const token = "{{current_user.access_token}}";
+            // create a new spotify player (this player is how we communicate with spotify, it talks to spotify api under the hood)
             const player = new Spotify.Player({
                 name: 'Web Playback SDK Quick Start Player',
                 getOAuthToken: cb => { cb(token); }
             });
-            const songTitle = document.getElementById("songTitle");
+
+            // get the songTitle
+            // const songTitle = document.getElementById("songTitle");
+            // get the progress bar so we can edit it
             const fillBar = document.getElementById("fill");
 
+            // we use this variable to remember if the user clicked down on the progress bar
+            // if it is clicked down then when they move the mouse in the progress bar we update the progress to the location they are hovering over.
             var clicked = false;
+            // this is the duration of the current song in miliseconds
             const duration = {{current_song['duration_ms']}};
 
             // Error handling
+            // prints errors incase there are any errors loading the player
+            // Create a listen handler for these 4 events for errors regarding the music player 
+            // If my player has an error, it will trigger the error, and will log the error
             player.addListener('initialization_error', ({ message }) => { console.error(message); });
             player.addListener('authentication_error', ({ message }) => { console.error(message); });
             player.addListener('account_error', ({ message }) => { console.error(message); });
             player.addListener('playback_error', ({ message }) => { console.error(message); });
-
-            // Playback status updates
-            // player.addListener('player_state_changed', state => { console.log(state); });
     
-            // Ready
+            // the ready listener (this is called when the player is ready to play)
             player.addListener('ready', ({ device_id }) => {
                 console.log('Ready with Device ID', device_id);
+
+                // we call the play function when the player is ready
                 play({
                     playerInstance: player,
                     spotify_uri: '{{current_song["uri"]}}',
                 });
+
+                // we also call the getState function (see below for more details)
                 getState()
             });
     
-            // Not Ready
+            // Not Ready listener
             player.addListener('not_ready', ({ device_id }) => {
                 console.log('Device ID has gone offline', device_id);
             });
 
             // https://developer.spotify.com/documentation/web-playback-sdk/reference/#api-spotify-player-previoustrack
+            // the play function will send a request to spotify to start the song
             const play = ({
                 spotify_uri,
                 playerInstance: {
@@ -82,6 +96,7 @@
                     }
                 }}) => {
                     getOAuthToken(access_token => {
+                        // the url contains the song id
                         fetch(`https://api.spotify.com/v1/me/player/play?device_id=${id}`, {
                         method: 'PUT',
                         body: JSON.stringify({ uris: [spotify_uri] }),
@@ -93,6 +108,7 @@
                     });
                 };
 
+            // once started, getState will run asynchronous
             function getState() {
                 setTimeout(getState, 1000)
                 player.getCurrentState().then(state => {
