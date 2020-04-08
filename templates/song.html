@@ -46,21 +46,13 @@
                 getOAuthToken: cb => { cb(token); }
             });
 
-            // get the songTitle
-            // const songTitle = document.getElementById("songTitle");
-            // get the progress bar so we can edit it
             const fillBar = document.getElementById("fill");
 
-            // we use this variable to remember if the user clicked down on the progress bar
-            // if it is clicked down then when they move the mouse in the progress bar we update the progress to the location they are hovering over.
+
             var clicked = false;
             // this is the duration of the current song in miliseconds
             const duration = {{current_song['duration_ms']}};
 
-            // Error event handling
-            // prints errors incase there are any errors loading the player
-            // Create a listen handler for these 4 events for errors regarding the music player 
-            // If my player has an error, it will trigger the error, and will log the error
             player.addListener('initialization_error', ({ message }) => { console.error(message); });
             player.addListener('authentication_error', ({ message }) => { console.error(message); });
             player.addListener('account_error', ({ message }) => { console.error(message); });
@@ -76,20 +68,13 @@
                     spotify_uri: '{{current_song["uri"]}}',
                 });
 
-                // we also call the getState function (see below for more details)
-                // get state will trigger a function to check the state of the player every second and update the progress bar
                 getState()
             });
     
-            // Not Ready listener
-            // tells us if the player is offline
             player.addListener('not_ready', ({ device_id }) => {
                 console.log('Device ID has gone offline', device_id);
             });
 
-            // https://developer.spotify.com/documentation/web-playback-sdk/reference/#api-spotify-player-previoustrack
-            // the play function will send a request to spotify to start the song
-            // play accepts a dictionary with the following keys, these keys becomes variables in the function
             const play = ({
                 spotify_uri,
                 playerInstance: {
@@ -98,12 +83,9 @@
                     id
                     }
                 }}) => {
-                    // getOAuthToken is a function that we call to give our function the access token.
                     getOAuthToken(access_token => {
-                        // the url contains the song id
                         fetch(`https://api.spotify.com/v1/me/player/play?device_id=${id}`, {
                         method: 'PUT',
-                        // the array contains the songs to be put on the playback, we only want the current song on the page
                         body: JSON.stringify({ uris: [spotify_uri] }),
                         headers: {
                             'Content-Type': 'application/json',
@@ -113,8 +95,7 @@
                     });
                 };
 
-            // once started, getState will run asynchronous every second
-            // this function is use to check the progress of the song every second and update the progress bar and other details
+
             function getState() {
                 // setTimeout will call this function again in 1000 milliseconds (1 second)
                 setTimeout(getState, 1000)
@@ -146,7 +127,7 @@
 
             // find the play/pause button
             const playButton = document.getElementById("play");
-            // when clicking on the button we will either resume or pause based on the current state (toggle play/pause)
+
             playButton.onclick = function() {
                 player.getCurrentState().then(state => {
                     if (state.paused) {
@@ -159,29 +140,22 @@
                 })  
             }
             
-            // below is the logic for the draggable progress bar
             const progressBar = document.getElementById("seek-bar");
 
-            // when the user press down on the bar we sit clicked to be true and and set the progess of the song to the location of the click
             progressBar.onmousedown = function(e){
                 clicked = true;
                 const progress = e.offsetX/300;
                 player.seek(progress*duration);
             }
 
-            // when user lifts up mouse we set click as false
             progressBar.onmouseup = function(e){
                 clicked = false;
             }
 
-            // when user leave the progress bar element we also set clicked as false
             progressBar.onmouseleave = function(e){
                 clicked = false;
             }
 
-            // when the user moves the mouse on the progress bar we check to see if they are pressing down (using above logic).
-            // if they are then we change the progress of the player to the location of the mouse.
-            // if the clicked value is false, then we assume that they are not holding down the mouse and not trying to move the progress bar
             progressBar.onmousemove = function(e){
                 if (clicked === true) {
                     const progress = e.offsetX/300;

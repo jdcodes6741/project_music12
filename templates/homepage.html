@@ -1,13 +1,11 @@
 {% extends "base.html" %}
 
 {% block head %}
-    <!-- 2d world map javascript -->
-    <!-- https://jvectormap.com/tutorials/getting-started/ -->
+
     <link rel="stylesheet" href="/static/jquery-jvectormap-2.0.5.css" type="text/css" media="screen"/>
-    <!-- https://developers.google.com/speed/libraries -->
-    <!-- https://code.jquery.com/ import jquery using this website-->
+
     <script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
-    <!-- https://jvectormap.com/tutorials/getting-started/ -->
+
     <script src="/static/jquery-jvectormap-2.0.5.min.js"></script>
     <script src="/static/jquery-jvectormap-world-merc.js"></script>
 {% endblock %}
@@ -27,15 +25,12 @@
                 </form>
             </div>
             <div class="display-container">
-                <!-- id=world-map, the vectormap function below will modify the div tag to create the map-->
 
-                <!-- https://jvectormap.com/tutorials/getting-started/ -->
-                <!-- jquery is a javascript library used to help us select elements, make AJAX request, and more -->
                 <div id="world-map" style="width: 1200px; height: 600px"></div>
             </div>
         {% else %}
             <h1 class="landing-page-title">Listen to music from the world</h1>
-            <!-- https://www.w3schools.com/html/html5_video.asp -->
+
             <video class="world-rotate" autoplay loop>
               <source src="/static/world_rotate.webm" type="video/webm">
               Your browser does not support HTML5 video.
@@ -44,14 +39,7 @@
     </div>
 
     <script>
-        // if it is a function inside the $, jquery will run the function when the DOM is finished loading.
         $(function(){
-            // query selector: jquery selecting a DOM element like div with the id='world-map'
-            // $('#world-map'): input is a string so it is a query selector and the jquery will select the element from the DOM that has the id #world-map
-            // vectormap function is a custom function created by the vector map library. vectorMap takes a javascript object (dictionary) as input 
-            // 1. first key "map" tells the world-map (div id="world-map") to render "world-merc" map in script tag above (according to the tutorial, the map value needs to be imported in the script tags). By running the vectorMap function, the element with the id=world-map is going to be generated with the map in the input object for vectorMap.
-            // 2. onRegionClick: click handler when you click on the region for the world map. Every time you click a country, it is going to run the function
-            // (map & onRegionClick)
             $('#world-map').vectorMap({
                 map: 'world_merc',
                 backgroundColor: 'black',
@@ -62,13 +50,7 @@
                 },
                 zoomOnScroll: false,
                 zoomMax: 1,
-                // Event handling, first parameter not used. Vectormap will call the function below and will provide input, which is the country code.
-                // Tutorial in the documentation
                 onRegionClick: function(_, code) {
-                    // console.log(code)
-                    // window.location.replace = javascript client redirect (not server redirect, client telling itself to redirect). Redirect to country_playlist page for the clicked country with javascript
-                    // https://stackoverflow.com/questions/503093/how-do-i-redirect-to-another-webpage
-                    // https://stackoverflow.com/questions/4744751/how-do-i-redirect-with-javascript
                     window.location.href = `/country_playlist/${code}`;
                 }
             });

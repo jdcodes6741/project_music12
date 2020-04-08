@@ -27,22 +27,11 @@
         </div>
     </div>
     <script>
-        // When you hover over an individual song, run the inside function
-        // https://www.w3schools.com/jquery/event_mouseover.asp
-        // example: e is the event that is triggered by Dance Monkey
         $('.items-display-item').mouseover(function(e){
-            // e.currentTarget: get's the current element that the mouse is hovering over it.
-            // e = element, tells you the element which you are hovering (example, we have 50 songs, it tells you which one you are hovering)
-            // https://www.w3schools.com/jsref/event_currenttarget.asp
-            // element = Dance Monkey
             const element = e.currentTarget;
-            // JQuery query selector gets class="display-image-content-image". Select all elements that have this class, and take the first element (we only expect to find one element from the array)
-            // Get the default album cover (Russia Top 50). This just gets the image tag. 
-            // JQuery selector finds a list of 1 (jquery selector vs. tag)
             const image = $('.display-image-content-image')[0];
-            // Change the image (from above) to the song that the user is hovering over (change the image source)
             image.src = element.getAttribute('image_src');
-        }).mouseout(function(e){ // mouseout (when you hover over an image and remove your mouse, the default will change back to the globe image.)
+        }).mouseout(function(e){
             const image = $('.display-image-content-image')[0];
             image.src = "https://geology.com/google-earth/google-earth.jpg";
         })
